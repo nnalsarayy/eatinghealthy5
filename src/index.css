@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInUp 150ms ease-out forwards;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.animate-ripple {
+  animation: ripple 1s linear;
+}
+
+@keyframes letterSpacingReduce {
+  from {
+    letter-spacing: 3px;
+  }
+  to {
+    letter-spacing: normal;
+  }
+}
+
+.animate-letter-spacing {
+  animation: letterSpacingReduce 1s ease-in-out forwards;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 30s linear infinite;
+}
+
+.navbar {
+  transition: all 0.3s ease-in-out;
+}
+
+.navbar-scrolled {
+  height: 60px;
+}
+
+.nav-link-underline {
+  @apply absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-[#FFD54F] to-[#FFB300] transition-all duration-300 group-hover:w-full;
+}
+
+.duration-1500 {
+  transition-duration: 1500ms;
+}
+
+@keyframes cartBounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+.cart-bounce {
+  animation: cartBounce 0.5s ease-in-out;
+}
+
+.cart-badge {
+  @apply absolute -top-2 -right-2 bg-gradient-to-r from-[#FFD54F] to-[#FFB300] text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center transition-all duration-300;
+}
+
+.cart-badge-enter {
+  transform: scale(0);
+}
+
+.cart-badge-enter-active {
+  transform: scale(1);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
