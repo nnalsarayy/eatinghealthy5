@@ -13,7 +13,7 @@ const CALLBACK_URL   = 'https://healthyeating.se/bekraftelse'; // Din tack-sida 
 const agent = new https.Agent({
   pfx: fs.readFileSync(path.join(__dirname, 'swish_certificate.p12')),
   passphrase: P12_PASSWORD,
-  ca: fs.readFileSync(path.join(__dirname, 'swish_certificate_202505081918.pem')),
+  ca: fs.readFileSync(path.join(__dirname, 'swish_root_ca.pem')),
   minVersion: 'TLSv1.2'
 });
 const client = axios.create({ httpsAgent: agent });
