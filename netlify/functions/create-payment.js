@@ -6,14 +6,14 @@ const { v4: uuidv4 } = require('uuid');
 
 // ===== Fyll i dina värden nedan =====
 const MERCHANT_ALIAS = '1232005668';           // Ditt Swish-nummer
-const P12_PASSWORD   = 'DITT_P12_LÖSENORD';    // Lösenordet till din .p12-fil
-const CALLBACK_URL   = 'https://din-domän.se/bekraftelse'; // Din tack-sida URL
+const P12_PASSWORD   = 'Champions2020!';    // Lösenordet till din .p12-fil
+const CALLBACK_URL   = 'https://healthyeating.se/bekraftelse'; // Din tack-sida URL
 // =====================================
 
 const agent = new https.Agent({
   pfx: fs.readFileSync(path.join(__dirname, 'swish_certificate.p12')),
   passphrase: P12_PASSWORD,
-  ca: fs.readFileSync(path.join(__dirname, 'swish_root_ca.pem')),
+  ca: fs.readFileSync(path.join(__dirname, 'swish_certificate_202505081918.pem')),
   minVersion: 'TLSv1.2'
 });
 const client = axios.create({ httpsAgent: agent });
