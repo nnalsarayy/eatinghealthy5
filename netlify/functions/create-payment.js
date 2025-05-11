@@ -1,21 +1,32 @@
-const fs    = require('fs');
-const path  = require('path');
 const https = require('https');
 const axios = require('axios');
 const { v4: uuidv4 } = require('uuid');
 
-// ===== Fyll i dina värden nedan =====
+////////////////////////////////////////////////////////////////
+// ======== KONFIGURATION VIA MILJÖVARIABLER ================
 const MERCHANT_ALIAS = '1232005668';           // Ditt Swish-nummer
-const P12_PASSWORD   = 'Champions2020!';    // Lösenordet till din .p12-fil
-const CALLBACK_URL   = 'https://healthyeating.se/bekraftelse'; // Din tack-sida URL
-// =====================================
+const CALLBACK_URL   = 'https://healthyeating.se/bekraftelse';
+const P12_PASSWORD   = process.env.P12_PASSWORD;
+// Dessa två innehåller halvorna av din Base64-kodade .p12
+const P12_B64_PART1  = process.env.SWISH_P12_B64_1;
+const P12_B64_PART2  = process.env.SWISH_P12_B64_2;
+// Hela Base64-strängen för din PEM-fil
+const CA_B64         = process.env.SWISH_CA_B64;
+// ===========================================================
 
+// Återskapa certifikat från Base64
+const pfxBuffer = Buffer.from(P12_B64_PART1 + P12_B64_PART2, 'base64');
+const caBuffer  = Buffer.from(CA_B64, 'base64');
+
+// Skapa HTTPS-agent med Swish-certifikat
 const agent = new https.Agent({
-  pfx: fs.readFileSync(path.join(__dirname, 'swish_certificate.p12')),
+  pfx: pfxBuffer,
   passphrase: P12_PASSWORD,
-  ca: fs.readFileSync(path.join(__dirname, 'swish_root_ca.pem')),
+  ca: caBuffer,
   minVersion: 'TLSv1.2'
 });
+
+// Axios-instans som använder agenten
 const client = axios.create({ httpsAgent: agent });
 const API_BASE = 'https://mss.cpc.getswish.net';
 
@@ -23,6 +34,7 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
+
   let body;
   try {
     body = JSON.parse(event.body);
@@ -31,7 +43,8 @@ exports.handler = async (event) => {
   }
 
   const { amount, message } = body;
-  const id = uuidv4().replace(/-/g, '').toUpperCase();
+  const instructionId = uuidv4().replace(/-/g, '').toUpperCase();
+
   const payload = {
     payeeAlias: MERCHANT_ALIAS,
     currency: 'SEK',
@@ -41,15 +54,26 @@ exports.handler = async (event) => {
   };
 
   try {
+    // Skicka betalningsförfrågan till Swish API
     await client.put(
-      `${API_BASE}/swish-cpcapi/api/v2/paymentrequests/${id}`,
+      `${API_BASE}/swish-cpcapi/api/v2/paymentrequests/${instructionId}`,
       payload,
       { headers: { 'Content-Type': 'application/json' } }
     );
-    const swishUrl = `swish://paymentrequest?token=${id}&callbackurl=${encodeURIComponent(CALLBACK_URL)}`;
-    return { statusCode: 200, body: JSON.stringify({ id, swishUrl }) };
+
+    // Skapa Swish-app-länk
+    const swishUrl = `swish://paymentrequest?token=${instructionId}&callbackurl=${encodeURIComponent(CALLBACK_URL)}`;
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ id: instructionId, swishUrl })
+    };
+
   } catch (err) {
-    console.error(err.response?.data || err.message);
-    return { statusCode: 500, body: JSON.stringify({ error: 'createPaymentRequest failed' }) };
+    console.error('Swish error:', err.response?.data || err.message);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'createPaymentRequest failed' })
+    };
   }
 };
