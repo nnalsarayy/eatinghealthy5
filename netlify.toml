@@ -1,0 +1,3 @@
+[build]
+  publish = "dist"        # eller mappen du publicerar via Bolt/Netlify
+  functions = "netlify/functions"
