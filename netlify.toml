@@ -1,7 +1,7 @@
 [build]
-  publish   = "dist"               # byt till din Bolt-publiceringsmapp
-  functions = "netlify/functions"  # pekar på dina serverless functions
+  functions = "netlify/functions"
+  publish   = "dist"    # or your build folder
 
 [dev]
-  command = "npm start"            # hur du kör Bolt lokalt om du använder Netlify CLI
+  command = "npm run dev"
   port    = 8888
